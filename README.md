@@ -1,10 +1,10 @@
-# mySync: Directory Synchronization Utility
+# mysync: Directory Synchronization Utility
 
-mySync is a command-line utility designed for the CITS2002 Project 2 in 2023. It enables the synchronization of the contents of two or more directories. For more details about the project, visit [CITS2002 Systems Programming - Project 2 2023](https://teaching.csse.uwa.edu.au/units/CITS2002/projects/project2.php).
+mysync is a command-line utility designed for the CITS2002 Project 2 in 2023. It enables the synchronization of the contents of two or more directories. For more details about the project, visit [CITS2002 Systems Programming - Project 2 2023](https://teaching.csse.uwa.edu.au/units/CITS2002/projects/project2.php).
 
 ## Project Overview
 
-In this project, files are considered identical if they exist in the same relative location below a 'top-level' directory, have the same filename, and identical contents. mySync aims to facilitate the synchronization process efficiently.
+In this project, files are considered identical if they exist in the same relative location below a 'top-level' directory, have the same filename, and identical contents. mysync aims to facilitate the synchronization process efficiently.
 
 ## Options
 
@@ -20,11 +20,11 @@ In this project, files are considered identical if they exist in the same relati
 
 - `-r`: Recursively processes directories found within the named directories for synchronization.
 
-- `-v`: Enables verbose mode, providing detailed output of mySync's actions on stdout.
+- `-v`: Enables verbose mode, providing detailed output of mysync's actions on stdout.
 
 ## Usage
 
-To utilize mySync, follow these steps:
+To utilize mysync, follow these steps:
 
 1. **Compile the program with make:**
 ```bash
