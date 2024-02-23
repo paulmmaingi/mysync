@@ -1,0 +1,12 @@
+#include "hashtable.h"
+
+
+// --------------------------------------------------------------------
+// FUNCTION DECLARATIONS
+
+//  CONVERT A FILENAME PATTERN (a glob) TO A REGULAR EXPRESSION.
+//  FILENAME PATTERNS MAY NOT INCLUDE DIRECTORY SEPARATORS.
+//	ON SUCCESS - A REGULAR EXPRESSION WILL BE RETURNED IN DYNAMICALLY
+//		     ALLOCATED MEMORY.
+//	ON FAILURE - A NULL POINTER WILL BE RETURNED.
+extern char* glob2regex(char* glob);
