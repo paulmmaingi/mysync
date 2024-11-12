@@ -4,9 +4,9 @@
 #include "data_structs.h"
 
 #include <dirent.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <regex.h>
+#include <sys/stat.h>
 
 // FUNCTION PROTOTYPES
 

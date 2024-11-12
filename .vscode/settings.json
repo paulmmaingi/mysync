@@ -1,11 +1,3 @@
 {
-    "emeraldwalk.runonsave": {
-        "commands": [
-            {
-                "match": "\\.c$|\\.h$",
-                "cmd": "npm run format:c"
-            }
-        ]
-    },
     "editor.formatOnSave": true
 }

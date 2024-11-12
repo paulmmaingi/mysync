@@ -2,7 +2,4 @@
 
 // FUNCTION DEFINITIONS
 
-bool isHidden(char *filename)
-{
-    return filename[0] == '.';
-}
+bool isHidden(char *filename) { return filename[0] == '.'; }
