@@ -1,0 +1,40 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+      - name: Set up build directories
+        run: |
+          mkdir -p obj
+          mkdir -p test1 test2
+
+      - name: Create test files
+        run: |
+          echo "test11" > test1/test11.txt
+          echo "test12" > test1/test12.txt
+          echo "test13" > test1/test13.txt
+          echo "test21" > test2/test21.txt
+          echo "test22" > test2/test22.txt
+
+      - name: Compile the code
+        run: make
+
+      - name: Run leak checks
+        env:
+          DIRS: "test1 test2"
+          OPTS: "-r -a"
+        run: make check-leaks
