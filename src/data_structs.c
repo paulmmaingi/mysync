@@ -19,21 +19,27 @@ File *initFile(char *fileName, char *filePath, off_t fileSize, time_t fileMtime,
 	return file;
 }
 
-void printFile(File *file)
+char *getFileDetails(File *file)
 {
 	char *permStr = perm2str(file->filePermissions);
 	if (permStr == NULL) {
 		perror(__func__);
-		return;
+		return NULL;
 	}
 	char *mtimeStr = ctime(&file->fileMtime);
 	if (mtimeStr == NULL) {
 		perror(__func__);
-		return;
+		return NULL;
 	}
 	mtimeStr[strlen(mtimeStr) - 1] = '\0'; // Remove the newline character
-	printf("\t  (%s [%s]): size=%ld bytes, mtime=%s\n, perms=%s\n", file->fileName, file->filePath, file->fileSize, mtimeStr, permStr);
+	char *details = calloc(strlen(file->fileName) + strlen(permStr) + strlen(mtimeStr) + 100, sizeof(char));
+	if (details == NULL) {
+		perror(__func__);
+		return NULL;
+	}
+	sprintf(details, "%s \t\t [size={%ld bytes}, perms={%s}, mtime={%s}]", file->fileName, file->fileSize, permStr, mtimeStr);
 	free(permStr);
+	return details;
 }
 
 void freeFile(File *file)
@@ -48,6 +54,29 @@ Directory *initDirectory(char *dirPath)
 {
 	Directory *dir = calloc(1, sizeof(Directory));
 	CHECK_ALLOC(dir);
+
+	// Extract the directory name from the path
+	char *dirName = strrchr(dirPath, '/');
+	if (dirName == NULL) {
+		// No '/' character found, so the directory is the root directory
+		dir->dirName = strdup(dirPath);
+		CHECK_ALLOC(dir->dirName);
+	} else {
+		// '/' character found, so the directory name is the substring after the last '/'
+		dir->dirName = strdup(dirName + 1);
+		CHECK_ALLOC(dir->dirName);
+	}
+	// Ensure the directory name ends with a '/'
+	size_t len = strlen(dir->dirName);
+	if (dir->dirName[len - 1] != '/') {
+		char *temp = calloc(len + 2, sizeof(char)); // '/' and '\0'
+		CHECK_ALLOC(temp);
+		strcpy(temp, dir->dirName);
+		strcat(temp, "/");
+		free(dir->dirName);
+		dir->dirName = temp;
+	}
+
 	dir->dirPath = strdup(dirPath);
 	CHECK_ALLOC(dir->dirPath);
 	dir->parentDir = NULL;
@@ -59,28 +88,72 @@ Directory *initDirectory(char *dirPath)
 	return dir;
 }
 
+void printDirectoryTree(Directory *dir, int depth, bool isLast)
+{
+	setlocale(LC_CTYPE, "");
+	wchar_t branchChar = 0x251C;	 // '├'
+	wchar_t lastBranchChar = 0x2514; // '└'
+	wchar_t verticalChar = 0x2502;	 // '│'
+	wchar_t horizontalChar = 0x2500; // '─'
+	wchar_t spaceChar = 0x0020;		 // ' '
+
+	if (dir == NULL) return;
+	if (depth > 0) {
+		printf("\t%lc%lc%lc %s\t (%d f, %d s)\n",
+			   isLast ? lastBranchChar : branchChar,
+			   horizontalChar,
+			   horizontalChar,
+			   dir->dirName,
+			   dir->numFiles,
+			   dir->numSubdirs);
+	} else {
+		printf("\t%s\n", dir->dirName);
+	}
+
+	if (dir->numFiles == 0 && dir->numSubdirs == 0) { return; }
+
+	int totalItems = dir->numFiles + dir->numSubdirs;
+	int currentItem = 0;
+
+	File *file = dir->files;
+	while (file != NULL) {
+		currentItem++;
+		for (int i = 0; i < depth; i++) { printf("\t"); }
+
+		bool isLastItem = (currentItem == totalItems);
+		char *fileDetailsStr = getFileDetails(file);
+		printf("\t%lc%lc%lc %s\n", isLastItem ? lastBranchChar : branchChar, horizontalChar, horizontalChar, fileDetailsStr);
+		free(fileDetailsStr);
+		file = file->nextFile;
+	}
+
+	for (int i = 0; i < dir->numSubdirs; i++) {
+		currentItem++;
+		for (int j = 0; j < depth; j++) {
+			printf("\t%lc", (isLast && currentItem == totalItems) ? spaceChar : verticalChar);
+		}
+		bool isLastSubdir = (currentItem == totalItems);
+		printDirectoryTree(dir->subdirs[i], depth + 1, isLastSubdir);
+	}
+}
+
 void printDirectory(Directory *dir)
 {
 	printf("----------------------------------------------------------------------------------------------------\n");
-	printf("DIRECTORY %s (%d file%s, %d subdirector%s)\n\n",
+	printf("%s (%d file%s, %d subdirector%s)\n\n",
 		   dir->dirPath,
 		   dir->numFiles,
 		   dir->numFiles == 1 ? "" : "s",
 		   dir->numSubdirs,
 		   dir->numSubdirs == 1 ? "y" : "ies");
-	File *file = dir->files;
-	while (file != NULL) {
-		printFile(file);
-		file = file->nextFile;
-	}
-	Directory **subdir = dir->subdirs;
-	for (int i = 0; i < dir->numSubdirs; i++) { printDirectory(subdir[i]); }
+	printDirectoryTree(dir, 0, true);
 	printf("\n");
 }
 
 void freeDirectory(Directory *dir)
 {
 	if (dir == NULL) { return; }
+	free(dir->dirName);
 	free(dir->dirPath);
 	File *file = dir->files;
 	while (file != NULL) {
@@ -146,7 +219,7 @@ DirectoryList *initDirectoryList()
 void printDirectoryList(DirectoryList *dirList)
 {
 	printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-	printf("DIRECTORY LIST (%d director%s)\n\n", dirList->numDirs, dirList->numDirs == 1 ? "y" : "ies");
+	printf("DIRECTORY LIST (%d unique director%s)\n\n", dirList->numDirs, dirList->numDirs == 1 ? "y" : "ies");
 	Directory *dir = dirList->head;
 	while (dir != NULL) {
 		printDirectory(dir);
@@ -171,6 +244,10 @@ void freeDirectoryList(DirectoryList *dirList)
 void addDirectoryToDirectoryList(DirectoryList *dirList, Directory *dir)
 {
 	if (dirList == NULL || dir == NULL) { return; }
+	if (isDuplicateDirectory(dirList, dir)) {
+		freeDirectory(dir);
+		return;
+	}
 	if (dirList->head == NULL) {
 		dirList->head = dir;
 		dirList->tail = dir;
@@ -179,6 +256,18 @@ void addDirectoryToDirectoryList(DirectoryList *dirList, Directory *dir)
 		dirList->tail = dir;
 	}
 	dirList->numDirs++;
+}
+
+bool isDuplicateDirectory(DirectoryList *dirList, Directory *dir)
+{
+	if (dirList != NULL && dir != NULL) {
+		Directory *temp = dirList->head;
+		while (temp != NULL) {
+			if (strcmp(temp->dirPath, dir->dirPath) == 0) { return true; }
+			temp = temp->nextDir;
+		}
+	}
+	return false;
 }
 
 // COMMAND LINE OPTIONS FUNCTION DEFINITIONS
@@ -199,7 +288,13 @@ void printOptionList(OptionList *optList)
 	printf("OPTION LIST (%d option%s)\n\n", optList->numOpts, optList->numOpts == 1 ? "" : "s");
 	Option *opt = optList->head;
 	while (opt != NULL) {
-		printf("\t -%c%s%s%d%s", opt->flag, opt->numArgs > 0 ? " " : "", opt->numArgs > 0 ? "(" : "", opt->numArgs, opt->numArgs > 0 ? " args)" : "");
+		if (opt->numArgs == 0) {
+			printf("\t -%c", opt->flag);
+		} else if (opt->numArgs == 1) {
+			printf("\t -%c (1 arg): ", opt->flag);
+		} else {
+			printf("\t -%c (%d args): ", opt->flag, opt->numArgs);
+		}
 		for (int i = 0; i < opt->numArgs; i++) { printf("\"%s\"%s", opt->args[i], i < opt->numArgs - 1 ? ", " : ""); }
 		printf("\n");
 		opt = opt->nextOpt;

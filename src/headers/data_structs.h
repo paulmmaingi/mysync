@@ -4,7 +4,9 @@
 #include "base.h"
 
 #include <getopt.h>
+#include <locale.h>
 #include <time.h>
+#include <wchar.h>
 
 // STRUCT DEFINITIONS
 
@@ -27,10 +29,11 @@ typedef struct File {
 /**
  * @brief This struct represents a directory
  *
- * (`dirPath`, `parentDir`, `files`, `numFiles`, `subdirs`, `numSubdirs`, `nextDir`)
+ * (`dirName`, `dirPath`, `parentDir`, `files`, `numFiles`, `subdirs`, `numSubdirs`, `nextDir`)
  */
 typedef struct Directory {
-	char *dirPath;				 /**< The path of the directory */
+	char *dirName;				 /**< The name of the directory */
+	char *dirPath;				 /**< The absolute path of the directory from the provided directories */
 	struct Directory *parentDir; /**< The parent directory of the directory */
 	File *files;				 /**< The list of files in the directory */
 	int numFiles;				 /**< The number of files in the directory */
@@ -117,11 +120,12 @@ typedef struct ModificationList {
 extern File *initFile(char *fileName, char *filePath, off_t fileSize, time_t fileMtime, mode_t filePermissions);
 
 /**
- * @brief This function prints the contents of a file
+ * @brief This function is a helper function that returns a string containing the details of a file
  *
- * @param file The file to print
+ * @param file The file to get the details of
+ * @return A string containing the details of the file if successful, `NULL` otherwise
  */
-extern void printFile(File *file);
+extern char *getFileDetails(File *file);
 
 /**
  * @brief This function frees the memory allocated for a file
@@ -139,7 +143,16 @@ extern void freeFile(File *file);
 extern Directory *initDirectory(char *dirPath);
 
 /**
- * @brief This function prints the contents of a directory
+ * @brief This helper function prints the contents of a directory in a tree-like format
+ *
+ * @param dir The directory to print
+ * @param depth The depth of the directory in the tree
+ * @param isLast A boolean indicating if the directory is the last in the list
+ */
+extern void printDirectoryTree(Directory *dir, int depth, bool isLast);
+
+/**
+ * @brief This function uses `printDirectoryTree` to print the contents of a directory
  *
  * @param dir The directory to print
  */
@@ -206,6 +219,15 @@ extern void freeDirectoryList(DirectoryList *dirList);
  */
 extern void addDirectoryToDirectoryList(DirectoryList *dirList, Directory *dir);
 
+/**
+ * @brief This function checks if a directory already exists in a directory list
+ *
+ * @param dirList The directory list to search
+ * @param dir The directory to check
+ * @return `true` if the directory is a duplicate, `false` otherwise
+ */
+extern bool isDuplicateDirectory(DirectoryList *dirList, Directory *dir);
+
 // COMMAND LINE OPTIONS FUNCTION PROTOTYPES
 
 /**
@@ -246,7 +268,7 @@ extern Option *getOption(OptionList *optList, char flag);
  * @param arg The argument of the option to add
  * @return A pointer to the new option if successful, `NULL` otherwise
  */
-extern Option *addOptionToOptionList(OptionList *optList, char flag, char *arg);
+extern void addOptionToOptionList(OptionList *optList, char flag, char *arg);
 
 // MODIFICATION FUNCTION PROTOTYPES
 

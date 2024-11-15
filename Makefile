@@ -38,7 +38,7 @@ functions:
 
 .PHONY: check-leaks
 
-DIRS ?= test1 test2
+DIRS ?= test1 test2 test2/empty	test2/empty
 
 OPTS ?= -a -r
 
