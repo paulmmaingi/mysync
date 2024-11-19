@@ -1,7 +1,7 @@
 #ifndef SYNC_H
 #define SYNC_H
 
-#include "read_dir.h"
+#include "comparison.h"
 
 // FUNCTION PROTOTYPES
 

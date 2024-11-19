@@ -29,17 +29,17 @@ typedef struct File {
 /**
  * @brief This struct represents a directory
  *
- * (`dirName`, `dirPath`, `parentDir`, `files`, `numFiles`, `subdirs`, `numSubdirs`, `nextDir`)
+ * (`dirName`, `dirPath`, `parentDir`, `files`, `numFiles`, `headSubdir`, `tailSubdir`, `numSubdirs`, `nextDir`)
  */
 typedef struct Directory {
-	char *dirName;				 /**< The name of the directory */
-	char *dirPath;				 /**< The absolute path of the directory from the provided directories */
-	struct Directory *parentDir; /**< The parent directory of the directory */
-	File *files;				 /**< The list of files in the directory */
-	int numFiles;				 /**< The number of files in the directory */
-	struct Directory **subdirs;	 /**< The list of subdirectories in the directory */
-	int numSubdirs;				 /**< The number of subdirectories in the directory */
-	struct Directory *nextDir;	 /**< The next directory in the list */
+	char *dirName;				  /**< The name of the directory */
+	char *dirPath;				  /**< The absolute path of the directory from the provided directories */
+	struct Directory *parentDir;  /**< The parent directory of the directory */
+	File *files;				  /**< The list of files in the directory */
+	int numFiles;				  /**< The number of files in the directory */
+	struct Directory *headSubdir; /**< The head of the list of subdirectories */
+	int numSubdirs;				  /**< The number of subdirectories in the directory */
+	struct Directory *nextDir;	  /**< The next directory in the list */
 } Directory;
 
 /**
@@ -83,12 +83,12 @@ typedef struct OptionList {
 /**
  * @brief This struct represents a modification to be made; i.e. a file to be copied
  *
- * (`filePath`, `srcDirPath`, `destDirPath`, `nextMod`)
+ * (`fileSrcPath`, `srcDirPath`, `fileDestPath`, `nextMod`)
  */
 typedef struct Modification {
-	char *filePath;				  /**< The path of the file to be copied */
+	char *fileSrcPath;			  /**< The path of the file to be copied */
 	char *srcDirPath;			  /**< The path of the source directory */
-	char *destDirPath;			  /**< The path of the destination directory */
+	char *fileDestPath;			  /**< The path to copy the file to */
 	struct Modification *nextMod; /**< The next modification in the list */
 } Modification;
 
@@ -275,13 +275,12 @@ extern void addOptionToOptionList(OptionList *optList, char flag, char *arg);
 /**
  * @brief This function initializes a new modification
  *
- * @param filePath The path of the file to be copied
+ * @param fileSrcPath The path of the file to be copied
  * @param srcDirPath The path of the source directory
- * @param destDirPath The path of the destination directory
+ * @param fileDestPath The path to where the file will be copied (including the file name)
  * @return A pointer to the new modification if successful, `NULL` otherwise
- * @note The destination directory path in the returned modification will be based on the source directory path to account for recursive syncing with non-existent nested directories
  */
-extern Modification *initModification(char *filePath, char *srcDirPath, char *destDirPath);
+extern Modification *initModification(char *fileSrcPath, char *srcDirPath, char *fileDestPath);
 
 /**
  * @brief This function frees the memory allocated for a modification

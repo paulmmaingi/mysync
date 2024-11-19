@@ -87,6 +87,17 @@ int main(int argc, char *argv[])
 
 	printDirectoryList(dirList);
 
+	ModificationList *modList = compareAllDirectories(dirList);
+	if (modList == NULL) {
+		freeDirectoryList(dirList);
+		freeOptionList(optList);
+		exit(EXIT_FAILURE);
+	}
+
+	printModificationList(modList);
+
+	freeModificationList(modList);
+
 	freeDirectoryList(dirList);
 
 	freeOptionList(optList);
