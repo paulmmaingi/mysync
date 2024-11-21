@@ -1,3 +1,5 @@
 test*
 /mysync
 *.o
+.vscode/
+.clang-format

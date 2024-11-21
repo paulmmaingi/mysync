@@ -82,7 +82,7 @@ Directory *initDirectory(char *dirPath)
 	dir->parentDir = NULL;
 	dir->files = NULL;
 	dir->numFiles = 0;
-	dir->subdirs = NULL;
+	dir->headSubdir = NULL;
 	dir->numSubdirs = 0;
 	dir->nextDir = NULL;
 	return dir;
@@ -99,7 +99,7 @@ void printDirectoryTree(Directory *dir, int depth, bool isLast)
 
 	if (dir == NULL) return;
 	if (depth > 0) {
-		printf("\t%lc%lc%lc %s\t (%d f, %d s)\n",
+		printf("\033[1;34m\t%lc%lc%lc %s\t (%d f, %d s)\033[0m\n",
 			   isLast ? lastBranchChar : branchChar,
 			   horizontalChar,
 			   horizontalChar,
@@ -107,7 +107,7 @@ void printDirectoryTree(Directory *dir, int depth, bool isLast)
 			   dir->numFiles,
 			   dir->numSubdirs);
 	} else {
-		printf("\t%s\n", dir->dirName);
+		printf("\033[1;34m\t%s\033[0m\n", dir->dirName);
 	}
 
 	if (dir->numFiles == 0 && dir->numSubdirs == 0) { return; }
@@ -122,25 +122,27 @@ void printDirectoryTree(Directory *dir, int depth, bool isLast)
 
 		bool isLastItem = (currentItem == totalItems);
 		char *fileDetailsStr = getFileDetails(file);
-		printf("\t%lc%lc%lc %s\n", isLastItem ? lastBranchChar : branchChar, horizontalChar, horizontalChar, fileDetailsStr);
+		printf("\033[1;32m\t%lc%lc%lc %s\033[0m\n", isLastItem ? lastBranchChar : branchChar, horizontalChar, horizontalChar, fileDetailsStr);
 		free(fileDetailsStr);
 		file = file->nextFile;
 	}
 
-	for (int i = 0; i < dir->numSubdirs; i++) {
+	Directory *subdir = dir->headSubdir;
+	while (subdir != NULL) {
 		currentItem++;
-		for (int j = 0; j < depth; j++) {
-			printf("\t%lc", (isLast && currentItem == totalItems) ? spaceChar : verticalChar);
+		for (int i = 0; i < depth; i++) {
+			printf("\033[\t%lc\033[0m", (isLast && currentItem == totalItems) ? spaceChar : verticalChar);
 		}
-		bool isLastSubdir = (currentItem == totalItems);
-		printDirectoryTree(dir->subdirs[i], depth + 1, isLastSubdir);
+		bool isLastItem = (currentItem == totalItems);
+		printDirectoryTree(subdir, depth + 1, isLastItem);
+		subdir = subdir->nextDir;
 	}
 }
 
 void printDirectory(Directory *dir)
 {
 	printf("----------------------------------------------------------------------------------------------------\n");
-	printf("%s (%d file%s, %d subdirector%s)\n\n",
+	printf("\033[1;35m%s (%d file%s, %d subdirector%s)\033[0m\n\n",
 		   dir->dirPath,
 		   dir->numFiles,
 		   dir->numFiles == 1 ? "" : "s",
@@ -161,9 +163,11 @@ void freeDirectory(Directory *dir)
 		file = file->nextFile;
 		freeFile(temp);
 	}
-	if (dir->subdirs != NULL) {
-		for (int i = 0; i < dir->numSubdirs; i++) { freeDirectory(dir->subdirs[i]); }
-		free(dir->subdirs);
+	Directory *subdir = dir->headSubdir;
+	while (subdir != NULL) {
+		Directory *temp = subdir;
+		subdir = subdir->nextDir;
+		freeDirectory(temp);
 	}
 	free(dir);
 }
@@ -171,6 +175,7 @@ void freeDirectory(Directory *dir)
 void addFileToDirectory(Directory *dir, File *file)
 {
 	if (dir == NULL || file == NULL) { return; }
+	// LIFO order
 	file->nextFile = dir->files;
 	dir->files = file;
 	dir->numFiles++;
@@ -192,17 +197,9 @@ void addSubdirToDirectory(Directory *dir, Directory *subdir)
 {
 	if (dir == NULL || subdir == NULL) { return; }
 	subdir->parentDir = dir;
-	if (dir->subdirs == NULL) {
-		dir->subdirs = calloc(1, sizeof(Directory *));
-		CHECK_ALLOC(dir->subdirs);
-		dir->subdirs[0] = subdir;
-	} else {
-		dir->subdirs = realloc(dir->subdirs, (dir->numSubdirs + 1) * sizeof(Directory *));
-		CHECK_ALLOC(dir->subdirs);
-		dir->subdirs[dir->numSubdirs] = subdir;
-	}
-	if (dir->numSubdirs > 0) { dir->subdirs[dir->numSubdirs - 1]->nextDir = subdir; }
-	subdir->nextDir = NULL;
+	// LIFO order
+	subdir->nextDir = dir->headSubdir;
+	dir->headSubdir = subdir;
 	dir->numSubdirs++;
 }
 
@@ -216,10 +213,13 @@ DirectoryList *initDirectoryList()
 	return dirList;
 }
 
-void printDirectoryList(DirectoryList *dirList)
+void printDirectoryList(DirectoryList *dirList, int status)
 {
 	printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-	printf("DIRECTORY LIST (%d unique director%s)\n\n", dirList->numDirs, dirList->numDirs == 1 ? "y" : "ies");
+	printf("\033[1;31mDIRECTORY LIST %s SYNC\033[0m (%d unique director%s)\n\n",
+		   status == 0 ? "BEFORE" : "AFTER",
+		   dirList->numDirs,
+		   dirList->numDirs == 1 ? "y" : "ies");
 	Directory *dir = dirList->head;
 	while (dir != NULL) {
 		printDirectory(dir);
@@ -285,7 +285,7 @@ OptionList *initOptionList()
 void printOptionList(OptionList *optList)
 {
 	printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-	printf("OPTION LIST (%d option%s)\n\n", optList->numOpts, optList->numOpts == 1 ? "" : "s");
+	printf("\033[1;31mOPTION LIST\033[0m (%d option%s)\n\n", optList->numOpts, optList->numOpts == 1 ? "" : "s");
 	Option *opt = optList->head;
 	while (opt != NULL) {
 		if (opt->numArgs == 0) {
@@ -370,17 +370,16 @@ void addOptionToOptionList(OptionList *optList, char flag, char *arg)
 
 // MODIFICATION FUNCTION DEFINITIONS
 
-Modification *initModification(char *filePath, char *srcDirPath, char *destDirPath)
+Modification *initModification(char *fileSrcPath, char *srcDirPath, char *fileDestPath)
 {
 	Modification *mod = calloc(1, sizeof(Modification));
 	CHECK_ALLOC(mod);
-	mod->filePath = strdup(filePath);
-	CHECK_ALLOC(mod->filePath);
+	mod->fileSrcPath = strdup(fileSrcPath);
+	CHECK_ALLOC(mod->fileSrcPath);
 	mod->srcDirPath = strdup(srcDirPath);
 	CHECK_ALLOC(mod->srcDirPath);
-	// NEED TO MODIFY DESTDIRPATH TO ACCOUNT FOR RECURSIVE SYNCING WITH NON-EXISTENT NESTED DIRECTORIES
-	mod->destDirPath = strdup(destDirPath);
-	CHECK_ALLOC(mod->destDirPath);
+	mod->fileDestPath = strdup(fileDestPath);
+	CHECK_ALLOC(mod->fileDestPath);
 	mod->nextMod = NULL;
 	return mod;
 }
@@ -388,9 +387,9 @@ Modification *initModification(char *filePath, char *srcDirPath, char *destDirPa
 void freeModification(Modification *mod)
 {
 	if (mod == NULL) { return; }
-	free(mod->filePath);
+	free(mod->fileSrcPath);
 	free(mod->srcDirPath);
-	free(mod->destDirPath);
+	free(mod->fileDestPath);
 	free(mod);
 }
 
@@ -407,14 +406,14 @@ ModificationList *initModificationList()
 void printModificationList(ModificationList *modList)
 {
 	printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-	printf("MODIFICATION LIST (%d modification%s needed):\n\n", modList->numMods, modList->numMods == 1 ? "" : "s");
-	printf("%-50s %-50s %-50s\n", "FILEPATH", "SRC DIR PATH", "DEST DIR PATH");
+	printf("\033[1;31mMODIFICATION LIST\033[0m (%d modification%s needed):\n\n", modList->numMods, modList->numMods == 1 ? "" : "s");
+	modList->numMods > 0 ? printf("%-50s %-50s\n", "FILE SRC PATH", "FILE DEST PATH") : printf("No modifications needed\n");
 	Modification *mod = modList->head;
 	while (mod != NULL) {
-		printf("%-50s %-50s %-50s\n", mod->filePath, mod->srcDirPath, mod->destDirPath);
+		printf("\033[1;32m%-50s %-50s\033[0m\n", mod->fileSrcPath, mod->fileDestPath);
 		mod = mod->nextMod;
 	}
-	printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END ~~~~~~ OF ~~~~~~ MODIFICATIONLIST ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
+	printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END ~~~~~~ OF ~~~~~~ MODIFICATIONLIST ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 }
 
 void freeModificationList(ModificationList *modList)
