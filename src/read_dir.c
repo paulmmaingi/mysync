@@ -128,10 +128,8 @@ Directory *readDirectory(char *dirPath, OptionList *optList)
 				addSubdirToDirectory(dir, subdir);
 			}
 		}
-
 		free(filePath);
 	}
-
 	closedir(dirp);
 	return dir;
 }
@@ -149,6 +147,5 @@ DirectoryList *readDirectories(int argc, int optind, char *argv[], OptionList *o
 		}
 		addDirectoryToDirectoryList(dirList, dir);
 	}
-
 	return dirList;
 }

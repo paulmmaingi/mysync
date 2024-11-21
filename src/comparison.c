@@ -5,7 +5,8 @@
 File *compareFilesMtime(File *file1, File *file2)
 {
 	if (file1 == NULL || file2 == NULL) { return NULL; }
-	return file1->fileMtime >= file2->fileMtime ? file1 : file2;
+	if (file1->fileMtime == file2->fileMtime) { return NULL; }
+	return file1->fileMtime > file2->fileMtime ? file1 : file2;
 }
 
 char *swapSrcDest(char *filePath, char *srcDirPath, char *destDirPath)
@@ -35,26 +36,16 @@ ModificationList *compareDirectories(Directory *dir1, Directory *dir2)
 				found = true;
 				// Compare mtimes and add newer file to modList
 				File *newer = compareFilesMtime(file1, file2);
-				if (newer == file1) {
-					char *destPath = swapSrcDest(file1->filePath, dir1->dirPath, dir2->dirPath);
+				if (newer != NULL) {
+					char *destPath = swapSrcDest(
+							newer->filePath,
+							newer == file1 ? dir1->dirPath : dir2->dirPath,
+							newer == file1 ? dir2->dirPath : dir1->dirPath);
 					if (destPath == NULL) {
 						freeModificationList(modList);
 						return NULL;
 					}
-					Modification *mod = initModification(file1->filePath, dir1->dirPath, destPath);
-					free(destPath);
-					if (mod == NULL) {
-						freeModificationList(modList);
-						return NULL;
-					}
-					addModificationToModificationList(modList, mod);
-				} else if (newer == file2) {
-					char *destPath = swapSrcDest(file2->filePath, dir2->dirPath, dir1->dirPath);
-					if (destPath == NULL) {
-						freeModificationList(modList);
-						return NULL;
-					}
-					Modification *mod = initModification(file2->filePath, dir2->dirPath, destPath);
+					Modification *mod = initModification(newer->filePath, newer == file1 ? dir1->dirPath : dir2->dirPath, destPath);
 					free(destPath);
 					if (mod == NULL) {
 						freeModificationList(modList);

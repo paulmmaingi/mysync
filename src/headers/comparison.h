@@ -11,7 +11,7 @@
  * @param file1 The first file to compare
  * @param file2 The second file to compare
  * @return The file with the most recent modification time if successful, `NULL` otherwise
- * @note If the modification times are equal, the first file is returned
+ * @note If the modification times are equal, we return `NULL` - no need to sync
  */
 extern File *compareFilesMtime(File *file1, File *file2);
 

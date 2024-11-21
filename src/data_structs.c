@@ -213,10 +213,13 @@ DirectoryList *initDirectoryList()
 	return dirList;
 }
 
-void printDirectoryList(DirectoryList *dirList)
+void printDirectoryList(DirectoryList *dirList, int status)
 {
 	printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-	printf("DIRECTORY LIST (%d unique director%s)\n\n", dirList->numDirs, dirList->numDirs == 1 ? "y" : "ies");
+	printf("\033[1;31mDIRECTORY LIST %s SYNC\033[0m (%d unique director%s)\n\n",
+		   status == 0 ? "BEFORE" : "AFTER",
+		   dirList->numDirs,
+		   dirList->numDirs == 1 ? "y" : "ies");
 	Directory *dir = dirList->head;
 	while (dir != NULL) {
 		printDirectory(dir);
@@ -282,7 +285,7 @@ OptionList *initOptionList()
 void printOptionList(OptionList *optList)
 {
 	printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-	printf("OPTION LIST (%d option%s)\n\n", optList->numOpts, optList->numOpts == 1 ? "" : "s");
+	printf("\033[1;31mOPTION LIST\033[0m (%d option%s)\n\n", optList->numOpts, optList->numOpts == 1 ? "" : "s");
 	Option *opt = optList->head;
 	while (opt != NULL) {
 		if (opt->numArgs == 0) {
@@ -403,14 +406,14 @@ ModificationList *initModificationList()
 void printModificationList(ModificationList *modList)
 {
 	printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-	printf("MODIFICATION LIST (%d modification%s needed):\n\n", modList->numMods, modList->numMods == 1 ? "" : "s");
+	printf("\033[1;31mMODIFICATION LIST\033[0m (%d modification%s needed):\n\n", modList->numMods, modList->numMods == 1 ? "" : "s");
 	modList->numMods > 0 ? printf("%-50s %-50s\n", "FILE SRC PATH", "FILE DEST PATH") : printf("No modifications needed\n");
 	Modification *mod = modList->head;
 	while (mod != NULL) {
-		printf("%-50s %-50s\n", mod->fileSrcPath, mod->fileDestPath);
+		printf("\033[1;32m%-50s %-50s\033[0m\n", mod->fileSrcPath, mod->fileDestPath);
 		mod = mod->nextMod;
 	}
-	printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END ~~~~~~ OF ~~~~~~ MODIFICATIONLIST ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
+	printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END ~~~~~~ OF ~~~~~~ MODIFICATIONLIST ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 }
 
 void freeModificationList(ModificationList *modList)

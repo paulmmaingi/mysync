@@ -202,7 +202,7 @@ extern DirectoryList *initDirectoryList();
  *
  * @param dirList The directory list to print
  */
-extern void printDirectoryList(DirectoryList *dirList);
+extern void printDirectoryList(DirectoryList *dirList, int status);
 
 /**
  * @brief This function frees the memory allocated for a directory list

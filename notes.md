@@ -16,6 +16,8 @@ $\texttt{dir1/file1}$ vs $\texttt{dir3/file1}$ $\rightarrow$ $\texttt{dir1/file1
 $\texttt{dir2/file1}$ vs $\texttt{dir3/file1}$ $\rightarrow$ $\texttt{dir2/file1}$\
 The losing file in these comparisons will get modified and thus contain the most recent data. Regardless of the order of the directories or the comparison order above, the most recent file ends up winning as all the files that lose to a comparison with it will get updated and thus contain the most recent data. For example, in the above example, $\texttt{dir2/file1}$ will get updated first to have the most recent data from $\texttt{dir1/file1}$ and then $\texttt{dir3/file1}$ will get updated to have the most recent data from $\texttt{dir1/file1}$. The last comparison is unnecessary in this case but still ends up with the correct implementation as $\texttt{dir3/file1}$ and $\texttt{dir2/file1}$ both contain the most recent data from $\texttt{dir1/file1}$. If the order of comparisons were different, say the last comparison was made first, the same result would be obtained as the last 2 would ensure the most recent data is in all files.
 
+Thought of a better way to word this: every directory gets compared to every other directory and so the directory with the most recent data will always update the other directories in its comparison with them and they can never get a worse mtime if already they have the most recent data.
+
 ## Line count
 
 ```bash

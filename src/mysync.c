@@ -79,26 +79,43 @@ int main(int argc, char *argv[])
 
 	printOptionList(optList);
 
-	DirectoryList *dirList = readDirectories(argc, optind, argv, optList);
-	if (dirList == NULL) {
+	DirectoryList *dirListBeforeSync = readDirectories(argc, optind, argv, optList);
+	if (dirListBeforeSync == NULL) {
 		freeOptionList(optList);
 		exit(EXIT_FAILURE);
 	}
 
-	printDirectoryList(dirList);
+	printDirectoryList(dirListBeforeSync, 0);
 
-	ModificationList *modList = compareAllDirectories(dirList);
+	ModificationList *modList = compareAllDirectories(dirListBeforeSync);
 	if (modList == NULL) {
-		freeDirectoryList(dirList);
+		freeDirectoryList(dirListBeforeSync);
 		freeOptionList(optList);
 		exit(EXIT_FAILURE);
 	}
 
+	printf("\n");
 	printModificationList(modList);
+	printf("\n\033[1;31mOPERATIONS PERFORMED\033[0m:\n\n");
+
+	syncFiles(modList, optList);
+
+	DirectoryList *dirListAfterSync = readDirectories(argc, optind, argv, optList);
+	if (dirListAfterSync == NULL) {
+		freeModificationList(modList);
+		freeDirectoryList(dirListBeforeSync);
+		freeOptionList(optList);
+		exit(EXIT_FAILURE);
+	}
+
+	printf("\n");
+	printDirectoryList(dirListAfterSync, 1);
 
 	freeModificationList(modList);
 
-	freeDirectoryList(dirList);
+	freeDirectoryList(dirListBeforeSync);
+
+	freeDirectoryList(dirListAfterSync);
 
 	freeOptionList(optList);
 
