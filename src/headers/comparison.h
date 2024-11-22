@@ -12,6 +12,8 @@
  * @param file2 The second file to compare
  * @return The file with the most recent modification time if successful, `NULL` otherwise
  * @note If the modification times are equal, we return `NULL` - no need to sync
+ * @note But what if they were created at the same time but are different?
+ * @note I'll add a size comparison if the mtimes are equal and return the larger file if the sizes are different
  */
 extern File *compareFilesMtime(File *file1, File *file2);
 

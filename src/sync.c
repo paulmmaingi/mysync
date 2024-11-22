@@ -27,7 +27,7 @@ void createIntermediateDirectories(ModificationList *modList, bool verbose)
 					return;
 				}
 			} else if (!S_ISDIR(st.st_mode)) {
-				fprintf(stderr, "%s: %s is not a directory; A directory of the same name cannot be created\n", __func__, dirPath);
+				fprintf(stderr, "%s is not a directory; A directory of the same name cannot be created\n", dirPath);
 				free(dirPath);
 				return;
 			}
@@ -56,7 +56,7 @@ void copyFile(char *srcPath, char *destPath, OptionList *optList)
 		return;
 	}
 
-	char *buffer = calloc(1, 1024);
+	char *buffer = calloc(1, BUFSIZ);
 	if (buffer == NULL) {
 		perror(__func__);
 		close(srcFile);

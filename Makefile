@@ -38,10 +38,10 @@ functions:
 
 .PHONY: check-leaks
 
-# DIRS ?= test3 test2 test1
-DIRS ?= test4 test5
+DIRS ?= test3 test2 test1 test4
+# DIRS ?= test6 test5
 
-OPTS ?= -a -v -r
+OPTS ?= -vpar -i "yo"
 
 check-leaks: $(EXEC)
 	valgrind -s --leak-check=full --show-leak-kinds=all ./$(EXEC) $(OPTS) $(DIRS)

@@ -35,7 +35,7 @@ typedef struct Directory {
 	char *dirName;				  /**< The name of the directory */
 	char *dirPath;				  /**< The absolute path of the directory from the provided directories */
 	struct Directory *parentDir;  /**< The parent directory of the directory */
-	File *files;				  /**< The list of files in the directory */
+	File *files;				  /**< Pointer to the head of the list of files in the directory */
 	int numFiles;				  /**< The number of files in the directory */
 	struct Directory *headSubdir; /**< The head of the list of subdirectories */
 	int numSubdirs;				  /**< The number of subdirectories in the directory */
@@ -172,15 +172,6 @@ extern void freeDirectory(Directory *dir);
  * @param file The file to add
  */
 extern void addFileToDirectory(Directory *dir, File *file);
-
-/**
- * @brief This function checks if a file is in a directory
- *
- * @param dir The directory to check
- * @param file The file to check
- * @return `true` if the file is in the directory, `false` otherwise
- */
-extern bool fileInDirectory(Directory *dir, File *file);
 
 /**
  * @brief This function adds a subdirectory to a directory

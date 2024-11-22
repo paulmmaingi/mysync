@@ -23,24 +23,24 @@ Thought of a better way to word this: every directory gets compared to every oth
 ```bash
 git ls-files | xargs wc -l
 
-   28 .clang-format
    40 .github/workflows/c-cpp.yml
     4 .gitignore
-    2 .vscode/settings.json
    21 LICENSE
-   45 Makefile
+   46 Makefile
    74 README.md
-   21 notes.md
+   46 notes.md
     0 obj/.gitkeep
-  458 src/data_structs.c
+  255 src/comparison.c
+  433 src/data_structs.c
    61 src/extra_functions.c
    45 src/headers/base.h
-  328 src/headers/data_structs.h
+   56 src/headers/comparison.h
+  311 src/headers/data_structs.h
    14 src/headers/mysync.h
    40 src/headers/read_dir.h
-   54 src/headers/sync.h
-  106 src/mysync.c
-  153 src/read_dir.c
-  271 src/sync.c
- 1765 total
+   34 src/headers/sync.h
+  127 src/mysync.c
+  149 src/read_dir.c
+  130 src/sync.c
+ 1886 total
 ```

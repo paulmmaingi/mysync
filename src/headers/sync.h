@@ -11,6 +11,7 @@
  * @brief This function creates intermediate directories for a file path so that the directory exists when the file is to be copied
  *
  * @param modList The modification list containing the target file paths
+ * @param verbose Whether to print verbose output
  */
 extern void createIntermediateDirectories(ModificationList *modList, bool verbose);
 

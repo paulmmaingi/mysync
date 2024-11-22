@@ -71,13 +71,15 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	getOption(optList, 'n') ? addOptionToOptionList(optList, 'v', NULL) : NULL;
+
 	if (argc - optind < 2) {
 		fprintf(stderr, "%s: missing (%d) directory arguments; expecting at least 2\n", progName, 2 - (argc - optind));
 		freeOptionList(optList);
 		usage(progName);
 	}
 
-	printOptionList(optList);
+	getOption(optList, 'v') ? printOptionList(optList) : 0;
 
 	DirectoryList *dirListBeforeSync = readDirectories(argc, optind, argv, optList);
 	if (dirListBeforeSync == NULL) {
@@ -85,7 +87,7 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	printDirectoryList(dirListBeforeSync, 0);
+	getOption(optList, 'v') ? printDirectoryList(dirListBeforeSync, 0) : NULL;
 
 	ModificationList *modList = compareAllDirectories(dirListBeforeSync);
 	if (modList == NULL) {
@@ -94,28 +96,31 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	printf("\n");
+	getOption(optList, 'v') ? printf("\n") : 0;
 	printModificationList(modList);
-	printf("\n\033[1;31mOPERATIONS PERFORMED\033[0m:\n\n");
 
-	syncFiles(modList, optList);
+	!getOption(optList, 'n') && getOption(optList, 'v') ? printf("\n\033[1;31mOPERATIONS PERFORMED\033[0m:\n\n") : 0;
 
-	DirectoryList *dirListAfterSync = readDirectories(argc, optind, argv, optList);
-	if (dirListAfterSync == NULL) {
-		freeModificationList(modList);
-		freeDirectoryList(dirListBeforeSync);
-		freeOptionList(optList);
-		exit(EXIT_FAILURE);
+	!getOption(optList, 'n') ? syncFiles(modList, optList) : NULL;
+
+	if (!getOption(optList, 'n') && getOption(optList, 'v')) {
+		DirectoryList *dirListAfterSync = readDirectories(argc, optind, argv, optList);
+		if (dirListAfterSync == NULL) {
+			freeModificationList(modList);
+			freeDirectoryList(dirListBeforeSync);
+			freeOptionList(optList);
+			exit(EXIT_FAILURE);
+		}
+
+		printf("\n");
+		printDirectoryList(dirListAfterSync, 1);
+
+		freeDirectoryList(dirListAfterSync);
 	}
-
-	printf("\n");
-	printDirectoryList(dirListAfterSync, 1);
 
 	freeModificationList(modList);
 
 	freeDirectoryList(dirListBeforeSync);
-
-	freeDirectoryList(dirListAfterSync);
 
 	freeOptionList(optList);
 

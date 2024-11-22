@@ -39,9 +39,9 @@ Directory *readDirectory(char *dirPath, OptionList *optList)
 		}
 
 		if (S_ISREG(fileStat.st_mode)) {
-			if (getOption(optList, 'i')) {
+			Option *opt;
+			if ((opt = getOption(optList, 'i'))) {
 				bool match = false;
-				Option *opt = getOption(optList, 'i');
 				for (int i = 0; i < opt->numArgs; i++) {
 					char *re = glob2regex(opt->args[i]);
 					if (re == NULL) {
@@ -73,9 +73,8 @@ Directory *readDirectory(char *dirPath, OptionList *optList)
 				}
 			}
 
-			if (getOption(optList, 'o')) {
+			if ((opt = getOption(optList, 'o'))) {
 				bool match = false;
-				Option *opt = getOption(optList, 'o');
 				for (int i = 0; i < opt->numArgs; i++) {
 					char *re = glob2regex(opt->args[i]);
 					if (re == NULL) {

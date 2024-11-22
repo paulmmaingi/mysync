@@ -5,7 +5,10 @@
 File *compareFilesMtime(File *file1, File *file2)
 {
 	if (file1 == NULL || file2 == NULL) { return NULL; }
-	if (file1->fileMtime == file2->fileMtime) { return NULL; }
+	if (file1->fileMtime == file2->fileMtime) {
+		if (file1->fileSize != file2->fileSize) { return file1->fileSize > file2->fileSize ? file1 : file2; }
+		return NULL;
+	}
 	return file1->fileMtime > file2->fileMtime ? file1 : file2;
 }
 
@@ -32,6 +35,8 @@ ModificationList *compareDirectories(Directory *dir1, Directory *dir2)
 		bool found = false;
 		File *file2 = dir2->files;
 		while (file2 != NULL) {
+
+			// If the file is in both directories
 			if (strcmp(file1->fileName, file2->fileName) == 0) {
 				found = true;
 				// Compare mtimes and add newer file to modList
@@ -82,6 +87,8 @@ ModificationList *compareDirectories(Directory *dir1, Directory *dir2)
 		bool found = false;
 		file1 = dir1->files;
 		while (file1 != NULL) {
+
+			// If the file is in both directories - already checked so no need to compare mtimes
 			if (strcmp(file2->fileName, file1->fileName) == 0) {
 				found = true;
 				break;

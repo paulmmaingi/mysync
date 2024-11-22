@@ -122,6 +122,10 @@ void printDirectoryTree(Directory *dir, int depth, bool isLast)
 
 		bool isLastItem = (currentItem == totalItems);
 		char *fileDetailsStr = getFileDetails(file);
+		if (fileDetailsStr == NULL) {
+			perror(__func__);
+			return;
+		}
 		printf("\033[1;32m\t%lc%lc%lc %s\033[0m\n", isLastItem ? lastBranchChar : branchChar, horizontalChar, horizontalChar, fileDetailsStr);
 		free(fileDetailsStr);
 		file = file->nextFile;
@@ -179,18 +183,6 @@ void addFileToDirectory(Directory *dir, File *file)
 	file->nextFile = dir->files;
 	dir->files = file;
 	dir->numFiles++;
-}
-
-bool fileInDirectory(Directory *dir, File *file)
-{
-	if (dir != NULL && file != NULL) {
-		File *temp = dir->files;
-		while (temp != NULL) {
-			if (strcmp(temp->fileName, file->fileName) == 0) { return true; }
-			temp = temp->nextFile;
-		}
-	}
-	return false;
 }
 
 void addSubdirToDirectory(Directory *dir, Directory *subdir)
