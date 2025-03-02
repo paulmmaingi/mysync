@@ -14,12 +14,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y valgrind
+        run: sudo apt-get update
+
       - name: Set up build directories
         run: |
-          mkdir -p obj
           mkdir -p test1 test2
 
       - name: Create test files
@@ -30,10 +28,10 @@ jobs:
           echo "test21" > test2/test21.txt
           echo "test22" > test2/test22.txt
 
-      - name: Compile the code
+      - name: Compile the code with ASan
         run: make
 
-      - name: Run leak checks
+      - name: Run ASan checks
         env:
           DIRS: "test1 test2"
           OPTS: "-r -a"

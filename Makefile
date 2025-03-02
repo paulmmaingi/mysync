@@ -27,7 +27,7 @@ $(OBJ_DIR):
 
 clean:
 	rm -f $(OBJS)
-	rmdir $(OBJ_DIR)
+	rm -rf $(OBJ_DIR)
 
 fullclean: clean
 	rm -f $(EXEC)
@@ -42,10 +42,10 @@ functions:
 
 .PHONY: check-leaks
 
-DIRS ?= test3 test2 test1 test4
+DIRS ?= test2 test1
 # DIRS ?= test6 test5
 
-OPTS ?= -vpar -i "yo"
+OPTS ?= -vpar -i "*"
 
 check-leaks: $(EXEC)
-	valgrind -s --leak-check=full --show-leak-kinds=all ./$(EXEC) $(OPTS) $(DIRS)
+	ASAN_OPTIONS=detect_leaks=1 ./$(EXEC) $(OPTS) $(DIRS)
